@@ -19,7 +19,6 @@ def get_config():
         sysmon_logs= str(os.environ['SYSMON_LOG_FILE'])
         server_address= str(os.environ['SERVER_ADDRESS'])
         scapy_log= str(os.environ['SCAPY_LOG_FILE'])
-
         obj["siem"] = siem
         obj["port"] = port
         obj["logs_file_path"]=file_path
@@ -28,6 +27,7 @@ def get_config():
         obj["sysmon_logs"]=sysmon_logs
         obj["server_address"]=server_address
         obj["scapy_log"]=scapy_log
+        print(obj)
         return obj
     except Exception as e:
       logging.error("error", e)

@@ -9,7 +9,7 @@ connections = False
 lock = False
 def get_config():
     try:
-        obj={"siem":"","port":"","logs_file_path": "","certificate_path":"","certificate_password": "","sysmon_logs": "","scapy_log":"","server_address": ""}
+        obj={"siem":"","port":"","logs_file_path": "","certificate_path":"","certificate_password": "","sysmon_logs": "","scapy_log":"","file_logs":"","server_address": ""}
         siem=str(os.environ['SIEM'])
         port = os.environ['SIEM_PORT']
         file_path= str(os.environ['EVTX_LOGS_PATH'])
@@ -18,6 +18,7 @@ def get_config():
         sysmon_logs= str(os.environ['SYSMON_LOG_FILE'])
         server_address= str(os.environ['SERVER_ADDRESS'])
         scapy_log= str(os.environ['SCAPY_LOG_FILE'])
+        file_logs= str(os.environ['FILE_LOGS'])
 
         obj["siem"] = siem
         obj["port"] = port
@@ -27,6 +28,7 @@ def get_config():
         obj["sysmon_logs"]=sysmon_logs
         obj["server_address"]=server_address
         obj["scapy_log"]=scapy_log
+        obj["file_logs"] = file_logs
 
         return obj
     except Exception as e:
@@ -98,6 +100,8 @@ def read_file(file_name):
 def scheduler():
     schedule.every(10).minutes.do(lambda: read_file(obj['scapy_log']))
     schedule.every(10).minutes.do(lambda: read_file(obj['sysmon_logs']))
+    schedule.every(10).minutes.do(lambda: read_file(obj["file_logs"]))
+
     while True:
         schedule.run_pending()
         time.sleep(1)

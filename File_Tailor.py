@@ -1,20 +1,19 @@
+import tailer
 import json
-import Evtx.Evtx as evtx
-import xmltodict
-import socket
-import ssl
-import time
-import logging
 import os
+import ssl
+import logging
+import socket
 
-
-connections = False
-lock = False
-obj=None
-
+packet =	{
+    "time": "",
+    "action": "",
+    "file_path": "",
+    "user": ""
+}
 def get_config():
     try:
-        obj={"siem":"","port":"","logs_file_path": "","certificate_path":"","certificate_password": "","sysmon_logs": "","server_address": ""}
+        obj={"siem":"","port":"","logs_file_path": "","certificate_path":"","certificate_password": "","file_logs_path": "","sysmon_logs": "","scapy_log":"","file_logs":"","server_address": ""}
         siem=str(os.environ['SIEM'])
         port = os.environ['SIEM_PORT']
         file_path= str(os.environ['EVTX_LOGS_PATH'])
@@ -22,6 +21,9 @@ def get_config():
         certificate_password= str(os.environ['CERTIFICATE_PASSWORD'])
         sysmon_logs= str(os.environ['SYSMON_LOG_FILE'])
         server_address= str(os.environ['SERVER_ADDRESS'])
+        scapy_log= str(os.environ['SCAPY_LOG_FILE'])
+        file_logs= str(os.environ['FILE_LOGS'])
+        file_logs_path = str(os.environ["FILE_LOGS_PATH"])
         obj["siem"] = siem
         obj["port"] = port
         obj["logs_file_path"]=file_path
@@ -29,35 +31,24 @@ def get_config():
         obj["certificate_password"]=certificate_password
         obj["sysmon_logs"]=sysmon_logs
         obj["server_address"]=server_address
-        print(obj)
+        obj["scapy_log"]=scapy_log
+        obj["file_logs"] = file_logs
+        obj["file_logs_path"] = file_logs_path
+
         return obj
     except Exception as e:
-      logging.error("Error ", e)
+      logging.error("error", e)
 obj=get_config()
-def convert_xml_to_json(data_in_xml):
-    try:
-        log = json.loads(json.dumps(xmltodict.parse(data_in_xml, attr_prefix=" ", cdata_key="text")))
-        return log
-    except Exception as e:
-        logging.error('Error in parsing %s' % e)
-def hihp_tailer():
-    try:
-        with evtx.Evtx(obj['logs_file_path']) as rec:
-            oldL = 0
-            while True:
-                new_event = list(rec.records())
-                new_event_count = len(new_event)
-                if new_event_count > oldL:
-                    while new_event_count > oldL:
-                        log = convert_xml_to_json(new_event[oldL].xml())
-                        write_on_secure_socket(log)
-                        oldL += 1
-                else:
-                    time.sleep(0.5)
-    except FileNotFoundError as e:
-        logging.error("File Not Found %s" % e)
-
-
+def read_file_logs():
+  for line in tailer.follow(open(obj["file_logs_path"])):
+    file_data=str(line).split(",")
+    packet["time"]=str(file_data[0])
+    packet["action"]=str(file_data[1])
+    packet["file_path"] =file_data[2]
+    packet["user"] = file_data[3]
+    file_log=json.dumps(packet)
+    write_on_secure_socket(file_log)
+    print(file_log)
 def connection_socket():
     server_cert = obj['certificate_path']
     client_cert = obj['certificate_path']
@@ -84,11 +75,7 @@ def write_on_secure_socket(data_report):
         i = i + 1
         try:
             conn.connect((obj['siem'],int(obj['port'])))
-            data = str(data_report)
-            if "Event" and "EventID" in data:
-                encoded_report_data = bytes(str(data_report).replace("'", "\""), encoding='utf-8')
-            else:
-                encoded_report_data = bytes(data_report, encoding='utf-8')
+            encoded_report_data = bytes(data_report, encoding='utf-8')
             try:
                 conn.send(bytes(encoded_report_data))
             except socket.error as e:
@@ -104,11 +91,9 @@ def write_on_secure_socket(data_report):
             logging.error("Error while connection %s" %e)
     conn.close()
     if connections == False:
-        with open(obj['sysmon_logs'], "a") as source:
+        with open(obj["file_logs"], "a") as source:
             json.dump(data_report, source)
             source.write("\n")
 
-
 if __name__ == '__main__':
-    hihp_tailer()
-
+    read_file_logs()

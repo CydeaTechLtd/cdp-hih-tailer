@@ -43,7 +43,7 @@ def read_file_logs():
     file_data=str(line).split(",")
     packet["time"]=str(file_data[0])
     packet["action"]=str(file_data[1])
-    packet["file_path"] =file_data[2]
+    packet["paths"] =file_data[2]
     packet["user"] = file_data[3]
     file_log=json.dumps(packet)
     write_on_secure_socket(file_log)

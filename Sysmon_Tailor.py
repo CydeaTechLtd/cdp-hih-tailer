@@ -50,7 +50,7 @@ def hihp_tailer():
                 if new_event_count > oldL:
                     while new_event_count > oldL:
                         log = convert_xml_to_json(new_event[oldL].xml())
-                        # write_on_secure_socket(log)
+                        write_on_secure_socket(log)
                         oldL += 1
                 else:
                     time.sleep(0.5)

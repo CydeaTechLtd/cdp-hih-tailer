@@ -8,7 +8,7 @@ import socket
 packet =	{
     "time": "",
     "action": "",
-    "file_path": "",
+    "paths": "",
     "user": ""
 }
 def get_config():
@@ -34,7 +34,6 @@ def get_config():
         obj["scapy_log"]=scapy_log
         obj["file_logs"] = file_logs
         obj["file_logs_path"] = file_logs_path
-
         return obj
     except Exception as e:
       logging.error("error", e)
@@ -44,7 +43,7 @@ def read_file_logs():
     file_data=str(line).split(",")
     packet["time"]=str(file_data[0])
     packet["action"]=str(file_data[1])
-    packet["file_path"] =file_data[2]
+    packet["paths"] =file_data[2]
     packet["user"] = file_data[3]
     file_log=json.dumps(packet)
     write_on_secure_socket(file_log)

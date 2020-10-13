@@ -57,7 +57,6 @@ def hihp_tailer():
     except FileNotFoundError as e:
         logging.error("File Not Found %s" % e)
 
-
 def connection_socket():
     server_cert = obj['certificate_path']
     client_cert = obj['certificate_path']
@@ -71,8 +70,6 @@ def connection_socket():
         return conn
     except socket.error as e:
         logging.error("Error creating socket: %s" % e)
-
-
 def write_on_secure_socket(data_report):
     logging.info(data_report)
     conn = connection_socket()

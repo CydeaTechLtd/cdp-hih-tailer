@@ -8,7 +8,7 @@ import socket
 packet =	{
     "time": "",
     "action": "",
-    "file_path": "",
+    "paths": "",
     "user": ""
 }
 def get_config():
@@ -34,7 +34,6 @@ def get_config():
         obj["scapy_log"]=scapy_log
         obj["file_logs"] = file_logs
         obj["file_logs_path"] = file_logs_path
-
         return obj
     except Exception as e:
       logging.error("error", e)

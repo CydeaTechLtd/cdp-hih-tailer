@@ -50,13 +50,12 @@ def hihp_tailer():
                 if new_event_count > oldL:
                     while new_event_count > oldL:
                         log = convert_xml_to_json(new_event[oldL].xml())
-                        write_on_secure_socket(log)
+                        # write_on_secure_socket(log)
                         oldL += 1
                 else:
                     time.sleep(0.5)
     except FileNotFoundError as e:
         logging.error("File Not Found %s" % e)
-
 
 def connection_socket():
     server_cert = obj['certificate_path']
@@ -71,8 +70,6 @@ def connection_socket():
         return conn
     except socket.error as e:
         logging.error("Error creating socket: %s" % e)
-
-
 def write_on_secure_socket(data_report):
     logging.info(data_report)
     conn = connection_socket()

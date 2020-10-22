@@ -41,13 +41,12 @@ obj=get_config()
 def read_file_logs():
   for line in tailer.follow(open(obj["file_logs_path"])):
     file_data=str(line).split(",")
-    packet["time"]=str(file_data[0])
-    packet["action"]=str(file_data[1])
-    packet["paths"] =file_data[2]
-    packet["user"] = file_data[3]
+    packet["time"]=str(file_data[0]).lstrip()
+    packet["action"]=str(file_data[1]).lstrip()
+    packet["paths"] =str(file_data[2]).lstrip()
+    packet["user"] = str(file_data[3]).lstrip()
     file_log=json.dumps(packet)
     write_on_secure_socket(file_log)
-    print(file_log)
 def connection_socket():
     server_cert = obj['certificate_path']
     client_cert = obj['certificate_path']
@@ -57,7 +56,7 @@ def connection_socket():
         s.settimeout(1000)
         context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=server_cert)
         context.load_cert_chain(certfile=client_cert, keyfile=client_key, password=obj['certificate_password'])
-        conn = context.wrap_socket(s, server_side=False, server_hostname=(obj['server_address']))
+        conn = context.wrap_socket(s, server_side=False, server_hostname="localhost")
         return conn
     except socket.error as e:
         logging.error("Error creating socket: %s" % e)
@@ -73,7 +72,7 @@ def write_on_secure_socket(data_report):
         connections = True
         i = i + 1
         try:
-            conn.connect((obj['siem'],int(obj['port'])))
+            conn.connect(("58.65.161.140","55701"))
             encoded_report_data = bytes(data_report, encoding='utf-8')
             try:
                 conn.send(bytes(encoded_report_data))
@@ -90,9 +89,8 @@ def write_on_secure_socket(data_report):
             logging.error("Error while connection %s" %e)
     conn.close()
     if connections == False:
-        with open(obj["file_logs"], "a") as source:
-            json.dump(data_report, source)
-            source.write("\n")
-
+        with open(obj["file_logs"], "a") as outfile:
+            outfile.write(data_report)
+            outfile.write("\n")
 if __name__ == '__main__':
     read_file_logs()

@@ -56,7 +56,7 @@ def connection_socket():
         s.settimeout(1000)
         context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=server_cert)
         context.load_cert_chain(certfile=client_cert, keyfile=client_key, password=obj['certificate_password'])
-        conn = context.wrap_socket(s, server_side=False, server_hostname="localhost")
+        conn = context.wrap_socket(s, server_side=False, server_hostname=(obj['server_address']))
         return conn
     except socket.error as e:
         logging.error("Error creating socket: %s" % e)
@@ -72,7 +72,7 @@ def write_on_secure_socket(data_report):
         connections = True
         i = i + 1
         try:
-            conn.connect(("58.65.161.140","55701"))
+            conn.connect((obj['siem'],int(obj['port'])))
             encoded_report_data = bytes(data_report, encoding='utf-8')
             try:
                 conn.send(bytes(encoded_report_data))

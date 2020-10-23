@@ -87,6 +87,7 @@ def write_on_secure_socket(data_report):
             else:
                 encoded_report_data = bytes(data_report, encoding='utf-8')
             try:
+                print("one line",encoded_report_data.lstrip())
                 conn.send(bytes(encoded_report_data))
             except socket.error as e:
                 logging.error("Error sending data: %s" % e)
@@ -102,8 +103,10 @@ def write_on_secure_socket(data_report):
     conn.close()
     if connections == False:
         with open(obj['sysmon_logs'], "a") as source:
+            print("in file",data_report)
             json.dump(data_report, source)
             source.write("\n")
+
 
 
 if __name__ == '__main__':

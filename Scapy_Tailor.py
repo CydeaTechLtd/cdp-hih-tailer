@@ -146,9 +146,9 @@ def write_on_secure_socket(data_report):
             logging.error("Error while connection %s" %e)
     conn.close()
     if connections == False:
-        with open(obj['scapy_log'], "a") as source:
-            json.dump(data_report, source)
-            source.write("\n")
+            with open(obj['scapy_log'], "a") as outfile:
+                outfile.write(data_report)
+                outfile.write("\n")
 
 
 pkt = sniff(iface="Wi-Fi",filter='tcp', prn=pkt_callback, store=1)

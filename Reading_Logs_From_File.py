@@ -29,7 +29,6 @@ def get_config():
         obj["server_address"]=server_address
         obj["scapy_log"]=scapy_log
         obj["file_logs"] = file_logs
-
         return obj
     except Exception as e:
       logging.error("error", e)
@@ -61,11 +60,7 @@ def write_on_secure_socket(data_report):
         i = i + 1
         try:
             conn.connect((obj['siem'],int(obj['port'])))
-            data = str(data_report)
-            if "Event" and "EventID" in data:
-                encoded_report_data = bytes(str(data_report).replace("'", "\""), encoding='utf-8')
-            else:
-                encoded_report_data = bytes(data_report, encoding='utf-8')
+            encoded_report_data = bytes(str(data_report).replace("'", "\""), encoding='utf-8')
             try:
                 conn.send(bytes(encoded_report_data))
                 successfull_entry  = True
@@ -80,7 +75,6 @@ def write_on_secure_socket(data_report):
         except Exception as e:
             connected = True
             logging.error("Error while connection %s" %e)
-
     conn.close()
     return successfull_entry
 
@@ -90,6 +84,7 @@ def read_file(file_name):
           Lines = file1.readlines()
           successfull_entry = False
           for line in Lines:
+              print(line)
               successfull_entry=write_on_secure_socket(eval(line.strip()))
           if successfull_entry == True:
              file1.truncate(0)
@@ -101,7 +96,6 @@ def scheduler():
     schedule.every(10).minutes.do(lambda: read_file(obj['scapy_log']))
     schedule.every(10).minutes.do(lambda: read_file(obj['sysmon_logs']))
     schedule.every(10).minutes.do(lambda: read_file(obj["file_logs"]))
-
     while True:
         schedule.run_pending()
         time.sleep(1)

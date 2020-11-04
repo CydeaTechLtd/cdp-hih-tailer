@@ -14,7 +14,7 @@ obj=None
 
 def get_config():
     try:
-        obj={"siem":"","port":"","logs_file_path": "","certificate_path":"","certificate_password": "","sysmon_logs": "","server_address": ""}
+        obj={"siem":"","port":"","logs_file_path": "","certificate_path":"","certificate_password": "","sysmon_logs": "","server_address": "","organization":""}
         siem=str(os.environ['SIEM'])
         port = os.environ['SIEM_PORT']
         file_path= str(os.environ['EVTX_LOGS_PATH'])
@@ -22,6 +22,8 @@ def get_config():
         certificate_password= str(os.environ['CERTIFICATE_PASSWORD'])
         sysmon_logs= str(os.environ['SYSMON_LOG_FILE'])
         server_address= str(os.environ['SERVER_ADDRESS'])
+        organization= str(os.environ['organization'])
+
         obj["siem"] = siem
         obj["port"] = port
         obj["logs_file_path"]=file_path
@@ -29,6 +31,8 @@ def get_config():
         obj["certificate_password"]=certificate_password
         obj["sysmon_logs"]=sysmon_logs
         obj["server_address"]=server_address
+        obj["organization"]=organization
+
         print(obj)
         return obj
     except Exception as e:
@@ -36,7 +40,9 @@ def get_config():
 obj=get_config()
 def convert_xml_to_json(data_in_xml):
     try:
+
         log = json.loads(json.dumps(xmltodict.parse(data_in_xml, attr_prefix=" ", cdata_key="text")))
+        log.update({"organization": obj['organization']})
         return log
     except Exception as e:
         logging.error('Error in parsing %s' % e)

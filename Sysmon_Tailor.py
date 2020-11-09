@@ -6,7 +6,7 @@ import ssl
 import time
 import logging
 import os
-
+from datetime import datetime, timedelta
 
 connections = False
 lock = False
@@ -48,6 +48,7 @@ def convert_xml_to_json(data_in_xml):
         logging.error('Error in parsing %s' % e)
 def hihp_tailer():
     try:
+
         with evtx.Evtx(obj['logs_file_path']) as rec:
             oldL = 0
             while True:
@@ -56,7 +57,24 @@ def hihp_tailer():
                 if new_event_count > oldL:
                     while new_event_count > oldL:
                         log = convert_xml_to_json(new_event[oldL].xml())
-                        write_on_secure_socket(log)
+                        try:
+                         event=log['Event']
+                         event_data=event['EventData']
+                        except Exception as e:
+                           print("Fields not found %s" %e)
+                        try:
+                         for item in event_data['Data']:
+                          if "UtcTime" in str(item):
+                            date=item['text']
+                            try:
+                              datetime_object = datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
+                              utc_time = datetime.utcnow() - timedelta(minutes=50)
+                              if datetime_object >= utc_time:
+                                 write_on_secure_socket(log)
+                            except Exception as e:
+                                  print("Error in time formatting %s" %e)
+                        except Exception as e:
+                           print("Error %s" %e)
                         oldL += 1
                 else:
                     time.sleep(0.5)

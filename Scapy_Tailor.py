@@ -2,6 +2,7 @@ import json
 import ssl
 import logging
 from scapy.all import *
+import socket
 
 import os
 
@@ -102,16 +103,10 @@ def pkt_callback(pkt):
         write_on_secure_socket(scapy_log)
 
 def connection_socket():
-    server_cert = obj['certificate_path']
-    client_cert = obj['certificate_path']
-    client_key = obj['certificate_path']
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(1000)
-        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=server_cert)
-        context.load_cert_chain(certfile=client_cert, keyfile=client_key, password=obj['certificate_password'])
-        conn = context.wrap_socket(s, server_side=False, server_hostname=(obj['server_address']))
-        return conn
+        return s
     except socket.error as e:
         logging.error("Error creating socket: %s" % e)
 

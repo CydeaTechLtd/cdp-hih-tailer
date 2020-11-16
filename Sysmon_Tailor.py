@@ -40,7 +40,6 @@ def get_config():
 obj=get_config()
 def convert_xml_to_json(data_in_xml):
     try:
-
         log = json.loads(json.dumps(xmltodict.parse(data_in_xml, attr_prefix=" ", cdata_key="text")))
         log.update({"organization": obj['organization']})
         return log
@@ -57,6 +56,7 @@ def hihp_tailer():
                 if new_event_count > oldL:
                     while new_event_count > oldL:
                         log = convert_xml_to_json(new_event[oldL].xml())
+                        print(log)
                         try:
                          event=log['Event']
                          event_data=event['EventData']
@@ -68,7 +68,11 @@ def hihp_tailer():
                             date=item['text']
                             try:
                               datetime_object = datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
+                              print(datetime_object)
                               utc_time = datetime.utcnow() - timedelta(minutes=50)
+                              print(utc_time)
+                              write_on_secure_socket(log)
+
                               if datetime_object >= utc_time:
                                  write_on_secure_socket(log)
                             except Exception as e:
@@ -82,16 +86,10 @@ def hihp_tailer():
         logging.error("File Not Found %s" % e)
 
 def connection_socket():
-    server_cert = obj['certificate_path']
-    client_cert = obj['certificate_path']
-    client_key = obj['certificate_path']
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(1000)
-        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=server_cert)
-        context.load_cert_chain(certfile=client_cert, keyfile=client_key, password=obj['certificate_password'])
-        conn = context.wrap_socket(s, server_side=False, server_hostname=(obj['server_address']))
-        return conn
+        return s
     except socket.error as e:
         logging.error("Error creating socket: %s" % e)
 def write_on_secure_socket(data_report):

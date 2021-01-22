@@ -1,4 +1,4 @@
 schedule
-Evtx
+pyevtx
 xmltodict
 ssl

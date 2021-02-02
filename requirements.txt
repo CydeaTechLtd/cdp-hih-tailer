@@ -1,4 +1,4 @@
 schedule
-pyevtx
+python-evtx
 xmltodict
 ssl

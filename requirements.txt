@@ -2,3 +2,4 @@ schedule
 python-evtx
 xmltodict
 ssl
+tailer

@@ -146,4 +146,4 @@ def write_on_secure_socket(data_report):
                 outfile.write("\n")
 
 
-pkt = sniff(iface="Wi-Fi",filter='tcp', prn=pkt_callback, store=1)
+pkt = sniff(iface="Ethernet",filter='tcp', prn=pkt_callback, store=1)
